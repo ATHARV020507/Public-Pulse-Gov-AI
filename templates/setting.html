@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings - Public Pulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="sidebar-logo">Public Pulse</div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('home') }}" class="nav-item"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
+            <li><a href="#" class="nav-item"><i class="fas fa-inbox"></i> Triage</a></li>
+            <li><a href="{{ url_for('settings') }}" class="nav-item active"><i class="fas fa-cog"></i> Settings</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-content">
+        
+        <header class="page-header">
+            <div class="header-title">
+                <h1>System Settings</h1>
+                <p>Configure AI Parameters and Account Preferences</p>
+            </div>
+            <div class="user-controls">
+                <span class="user-info">Officer: {{ current_user.username }}</span>
+                <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+            </div>
+        </header>
+
+        <div class="dashboard-wrapper">
+            
+            <div class="settings-wrapper">
+                
+                <div class="card profile-card">
+                    <div class="profile-avatar">
+                        {{ current_user.username[0].upper() }}
+                    </div>
+                    <h2 class="profile-name">Officer {{ current_user.username }}</h2>
+                    <p class="profile-role">System Administrator</p>
+                    
+                    <div class="profile-meta">
+                        <div class="meta-item"><i class="fas fa-id-badge"></i> ID: #892201</div>
+                        <div class="meta-item"><i class="fas fa-building"></i> Dept: MCA Analysis</div>
+                        <div class="meta-item"><i class="fas fa-clock"></i> Last Login: Just Now</div>
+                    </div>
+                </div>
+
+                <div class="settings-panel">
+                    <div class="settings-header">
+                        <h3>Configuration</h3>
+                    </div>
+                    <div class="settings-body">
+                        
+                        <div class="setting-section">
+                            <div class="section-title"><i class="fas fa-paint-brush"></i> Appearance</div>
+                            <div class="toggle-wrapper">
+                                <div class="toggle-label">
+                                    <strong>Dark Mode</strong>
+                                    <span>Switch to high-contrast dark theme</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="dark-mode-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-section">
+                            <div class="section-title"><i class="fas fa-robot"></i> AI Model Calibration</div>
+                            <div class="form-group">
+                                <label>Confidence Threshold (Current: 80%)</label>
+                                <div class="range-container">
+                                    <input type="range" min="50" max="95" value="80" style="width: 100%;">
+                                    <div class="range-labels">
+                                        <span>Fast</span>
+                                        <span>Balanced</span>
+                                        <span>Strict</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-section">
+                            <div class="section-title"><i class="fas fa-bell"></i> Notifications</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Email Alerts</label>
+                                    <select>
+                                        <option>Urgent Issues Only</option>
+                                        <option>All Negative Feedback</option>
+                                        <option>Disabled</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Dashboard Refresh</label>
+                                    <select>
+                                        <option>Real-time</option>
+                                        <option>Every 5 mins</option>
+                                        <option>Every 30 mins</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="overflow: hidden; margin-top: 10px;">
+                            <button class="analyze-btn" style="width: auto; float: right;" onclick="alert('Settings Saved Successfully!')">Save Changes</button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

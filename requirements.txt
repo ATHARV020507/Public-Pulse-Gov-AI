@@ -1,0 +1,15 @@
+flask
+pandas
+scikit-learn
+lightgbm
+nltk
+transformers
+torch
+scipy
+sentence-transformers
+wordcloud
+flask-login
+flask-sqlalchemy
+werkzeug
+openpyxl
+gunicorn

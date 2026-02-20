@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Officer Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-body">
+    <div class="login-card">
+        <h2 style="color: #005a9c;">Public Pulse</h2>
+        <p style="color: #666; margin-bottom: 20px;">Secure Officer Access</p>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div style="color: red; margin-bottom: 15px;">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <input type="text" name="username" class="form-input" placeholder="Officer ID" required>
+            <input type="password" name="password" class="form-input" placeholder="Password" required>
+            <button type="submit" class="analyze-btn">Login</button>
+        </form>
+    </div>
+</body>
+</html>

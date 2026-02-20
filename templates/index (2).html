@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Pulse - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="sidebar-logo">Public Pulse</div>
+        <ul class="sidebar-nav">
+    <li><a href="{{ url_for('home') }}" class="nav-item active"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
+    
+    <li><a href="#triage-section" class="nav-item"><i class="fas fa-inbox"></i> Triage</a></li>
+
+    {% if current_user.is_authenticated and current_user.username == 'admin' %}
+    <li>
+        <a href="{{ url_for('admin_dashboard') }}" class="nav-item" style="color: #ff4d4d; border-left: 3px solid #ff4d4d; background: rgba(255, 77, 77, 0.1);">
+            <i class="fas fa-user-shield"></i> Super Admin
+        </a>
+    </li>
+    {% endif %}
+
+    <li><a href="{{ url_for('settings') }}" class="nav-item"><i class="fas fa-cog"></i> Settings</a></li>
+</ul>
+    </nav>
+
+    <div class="main-content">
+        <header class="page-header">
+            <div class="header-title">
+                <h1>Dashboard</h1>
+                <p>Live AI Analysis of eConsultation Feedback</p>
+            </div>
+            <div class="user-controls">
+                <span class="user-info">Officer: {{ current_user.username if current_user.is_authenticated else 'Guest' }}</span>
+                <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+            </div>
+        </header>
+
+        <div class="dashboard-wrapper">
+            
+            <div class="summary-cards">
+                <div class="card">
+                    <h3>Total Comments</h3>
+                    <p id="total-comments">0</p>
+                </div>
+                <div class="card negative">
+                    <h3>Overall Sentiment</h3>
+                    <p id="overall-sentiment">Loading...</p>
+                </div>
+                <div class="card alert">
+                    <h3>Urgent Alerts</h3>
+                    <p id="urgent-alerts">0</p>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3>Sentiment Distribution</h3>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="sentimentChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Top Negative Issues</h3>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="topicChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                
+                <div class="triage-section" id="triage-section">
+                    <div class="triage-header">
+                        <h2>Action-Priority Triage</h2>
+                        <select id="sentiment-filter" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="all">All Sentiments</option>
+                            <option value="urgent-negative">Urgent Only</option>
+                            <option value="negative">Negative</option>
+                            <option value="positive">Positive</option>
+                            <option value="neutral">Neutral</option>
+                        </select>
+                    </div>
+                    <div class="triage-table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%;">ID</th>
+                                    <th style="width: 15%;">Sentiment</th>
+                                    <th style="width: 30%;">Key Topics</th>
+                                    <th style="width: 45%;">AI Summary</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comment-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="analyze-section">
+                    <div class="widget-box">
+                        <h3>Analyze Feedback</h3>
+                        <div class="mode-tabs">
+                            <button id="mode-single" class="mode-btn active">Single Comment</button>
+                            <button id="mode-bulk" class="mode-btn inactive">Bulk Upload</button>
+                        </div>
+
+                        <div id="view-single">
+                            <textarea id="text-input" placeholder="Paste text here..."></textarea>
+                            <button id="analyze-btn" class="analyze-btn">Analyze</button>
+                        </div>
+
+                        <div id="view-bulk" class="hidden">
+                            <div style="border: 2px dashed #ccc; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 10px;">
+                                <i class="fas fa-cloud-upload-alt" style="font-size: 24px; color: #ccc; margin-bottom: 10px;"></i>
+                                <p style="margin: 0; font-size: 12px; color: #666;">Drop CSV / Excel file here</p>
+                                <input type="file" id="file-upload" style="margin-top: 10px; font-size: 12px;">
+                            </div>
+                            <button id="upload-btn" class="analyze-btn" style="background: #28a745;">Upload & Process</button>
+                        </div>
+                        
+                        <div id="loading-spinner" class="hidden" style="text-align:center; margin-top:15px; color: var(--primary-blue);">
+                            <i class="fas fa-spinner fa-spin"></i> Processing...
+                        </div>
+
+                        <div id="result-container" class="hidden" style="margin-top:20px; padding-top: 15px; border-top: 1px solid #eee;">
+                            <div id="single-result-content">
+                                <div style="margin-bottom: 8px;"><strong>Sentiment:</strong> <span id="sentiment-result"></span></div>
+                                <div style="margin-bottom: 8px;"><strong>Confidence:</strong> <span id="confidence-result"></span></div>
+                                <div style="margin-bottom: 8px;"><strong>Topics:</strong> <div id="topics-result" style="display:inline;"></div></div>
+                                <div style="margin-bottom: 8px;"><strong>Summary:</strong> <p id="summary-result" style="margin: 5px 0 0; color: #555; font-size: 14px;"></p></div>
+                                <div style="margin-top: 15px; font-size: 11px; color: #999;">
+                                    <span id="analysis-source-result"></span> | <span id="analysis-time-result"></span>
+                                </div>
+                            </div>
+                            <div id="bulk-result-content" class="hidden" style="text-align: center; color: var(--positive); font-weight: bold;">
+                                <i class="fas fa-check-circle"></i> <span id="bulk-msg"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="widget-box">
+                        <h3>Topic Cloud</h3>
+                        <img id="word-cloud-img" src="/wordcloud.png" alt="Live Word Cloud">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="welcome-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>👋 Welcome, Officer!</h2>
+            </div>
+            <div class="modal-body">
+                <p>You have successfully accessed the <strong>Public Pulse</strong> Action-Priority Dashboard.</p>
+                <div class="feature-list">
+                    <div class="feature-item"><i class="fas fa-robot" style="color: #005a9c;"></i><div><strong>3-Stage Hybrid AI</strong><p>Automatically detects Factual vs. Opinionated feedback.</p></div></div>
+                    <div class="feature-item"><i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i><div><strong>Urgency Detection</strong><p>Critical issues are flagged and prioritized.</p></div></div>
+                    <div class="feature-item"><i class="fas fa-chart-pie" style="color: #28a745;"></i><div><strong>Live Analytics</strong><p>Real-time charts and dynamic word clouds.</p></div></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="close-modal-btn" class="analyze-btn">Get Started</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
